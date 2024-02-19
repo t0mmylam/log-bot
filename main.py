@@ -2,10 +2,32 @@ import os
 import discord
 from datetime import datetime
 from dotenv import load_dotenv
-import sqlite3
+import psycopg2
+import psycopg2.extras
 
 load_dotenv()
 TOKEN = os.environ["TOKEN"]
+DB_HOST = os.environ["DB_HOST"]
+DB_NAME = os.environ["DB_NAME"]
+DB_USER = os.environ["DB_USER"]
+DB_PASS = os.environ["DB_PASSWORD"]
+
+# Connect to your postgres DB
+conn = psycopg2.connect(
+    dbname=DB_NAME,
+    user=DB_USER,
+    password=DB_PASS,
+    host=DB_HOST
+)
+cursor = conn.cursor()
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS logs (
+        id SERIAL PRIMARY KEY,
+        user_id bigint,
+        log_time TIMESTAMP
+    )
+''')
+conn.commit()
 
 intents = discord.Intents.default()
 intents.messages = True
@@ -14,39 +36,27 @@ intents.typing = True
 intents.members = True
 bot = discord.Client(intents=intents)
 
-# Database setup
-conn = sqlite3.connect('timeclock.db')
-cursor = conn.cursor()
-cursor.execute('''
-    CREATE TABLE IF NOT EXISTS logs (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        user_id TEXT,
-        log_time TEXT
-    )
-''')
-conn.commit()
-
 def isUserInDB(user_id):
     cursor.execute('''
-        SELECT * FROM logs WHERE user_id = ?
+        SELECT * FROM logs WHERE user_id = %s
     ''', (user_id,))
     return cursor.fetchone() is not None
 
 def getLogCount(user_id):
     cursor.execute('''
-        SELECT COUNT(*) FROM logs WHERE user_id = ?
+        SELECT COUNT(*) FROM logs WHERE user_id = %s
     ''', (user_id,))
     return cursor.fetchone()[0]
 
 def lastLog(user_id):
     cursor.execute('''
-        SELECT log_time FROM logs WHERE user_id = ? ORDER BY id DESC LIMIT 1
+        SELECT log_time FROM logs WHERE user_id = %s ORDER BY id DESC LIMIT 1
     ''', (user_id,))
     return cursor.fetchone()[0]
 
 def hasLoggedToday(user_id):
     cursor.execute('''
-        SELECT * FROM logs WHERE user_id = ? AND log_time >= date('now')
+        SELECT * FROM logs WHERE user_id = %s AND log_time >= CURRENT_DATE
     ''', (user_id,))
     return cursor.fetchone() is not None
 
@@ -68,7 +78,7 @@ async def on_message(message):
 
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         cursor.execute('''
-            INSERT INTO logs (user_id, log_time) VALUES (?, ?)
+            INSERT INTO logs (user_id, log_time) VALUES (%s, %s)
         ''', (user_id, now))
         conn.commit()
 
