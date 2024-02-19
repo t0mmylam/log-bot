@@ -1,6 +1,6 @@
 import os
 import discord
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 import psycopg2
 import psycopg2.extras
@@ -35,6 +35,11 @@ intents.message_content = True
 intents.typing = True
 intents.members = True
 bot = discord.Client(intents=intents)
+
+def get_est_now():
+    utc_now = datetime.now(timezone.utc)  # Current time in UTC
+    est_now = utc_now - timedelta(hours=5)  # Convert UTC to EST (UTC-5)
+    return est_now.strftime("%Y-%m-%d %H:%M:%S")
 
 def isUserInDB(user_id):
     cursor.execute('''
@@ -76,7 +81,7 @@ async def on_message(message):
             await message.channel.send(f"<@{str(message.author.id)}> has already logged work today.")
             return
 
-        now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        now = get_est_now()
         cursor.execute('''
             INSERT INTO logs (user_id, log_time) VALUES (%s, %s)
         ''', (user_id, now))
