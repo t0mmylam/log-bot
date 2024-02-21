@@ -106,14 +106,15 @@ async def on_message(message):
             SELECT user_id, COUNT(*) FROM logs GROUP BY user_id ORDER BY COUNT(*) DESC
         ''')
         leaderboard = cursor.fetchall()
+        guild = bot.get_guild(1207127307958100009)
         embed = discord.Embed(
             title="Leaderboard", description="Top 10 Users by Work Logged", color=0xff0000)
         for i, (user_id, count) in enumerate(leaderboard[:10]):
             if not user_id:
                 continue
-            user = bot.get_user(int(user_id))
+            member = guild.get_member(int(user_id))
             embed.add_field(
-                name=f"{i+1}. {user.display_name} | {count} Days", value="", inline=False)
+                name=f"{i+1}. {member.display_name} | {count} Days", value="", inline=False)
         await message.channel.send(embed=embed)
 
     if message.content.startswith('!help'):
