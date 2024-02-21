@@ -113,7 +113,7 @@ async def on_message(message):
                 continue
             user = bot.get_user(int(user_id))
             embed.add_field(
-                name=f"{i+1}. {user.global_name} | {count} Days", value="", inline=False)
+                name=f"{i+1}. {user.display_name} | {count} Days", value="", inline=False)
         await message.channel.send(embed=embed)
 
     if message.content.startswith('!help'):
