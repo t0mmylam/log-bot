@@ -117,6 +117,22 @@ async def on_message(message):
                 name=f"{i+1}. {member.display_name} | {count} Days", value="", inline=False)
         await message.channel.send(embed=embed)
 
+    if message.content.startswith('!lastmonth'):
+        cursor.execute('''
+            SELECT user_id, COUNT(*) FROM logs WHERE log_time >= CURRENT_DATE - INTERVAL '1 month' GROUP BY user_id ORDER BY COUNT(*) DESC
+        ''')
+        leaderboard = cursor.fetchall()
+        guild = bot.get_guild(1207127307958100009)
+        embed = discord.Embed(
+            title="Leaderboard", description="Top 10 Users by Work Logged Last Month", color=0xff0000)
+        for i, (user_id, count) in enumerate(leaderboard[:10]):
+            if not user_id:
+                continue
+            member = guild.get_member(int(user_id))
+            embed.add_field(
+                name=f"{i+1}. {member.display_name} | {count} Days", value="", inline=False)
+        await message.channel.send(embed=embed)
+
     if message.content.startswith('!help'):
         embed = discord.Embed(
             title="Timeclock Help", description="Commands for the Timeclock Bot", color=0xff0000)
@@ -129,7 +145,7 @@ async def on_message(message):
     if message.content.startswith('!clear'):
         args = message.content.split()
         if len(args) > 1:
-            user_id = args[1].id
+            user_id = args[1]
         else:
             user_id = message.author.id
 
@@ -143,7 +159,7 @@ async def on_message(message):
         args = message.content.split()
         user_id = str(message.author.id)
         if len(args) > 1:
-            user_id = args[1].id
+            user_id = args[1]
         else:
             user_id = message.author.id
 
