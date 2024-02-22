@@ -16,7 +16,8 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS logs (
         id SERIAL PRIMARY KEY,
         user_id bigint,
-        log_time TIMESTAMP
+        log_time TIMESTAMP,
+        description TEXT
     )
 ''')
 conn.commit()
@@ -80,10 +81,11 @@ async def on_message(message):
             await message.channel.send(f"<@{str(message.author.id)}> has already logged work today.")
             return
 
+        desc = message.content[1:]
         now = get_est_now()
         cursor.execute('''
-            INSERT INTO logs (user_id, log_time) VALUES (%s, %s)
-        ''', (user_id, now))
+            INSERT INTO logs (user_id, log_time, description) VALUES (%s, %s, %s)
+        ''', (user_id, now, desc))
         conn.commit()
 
         embed = discord.Embed(
@@ -91,6 +93,7 @@ async def on_message(message):
         embed.add_field(name="Log Time", value=now, inline=True)
         embed.add_field(name="Days Worked",
                         value=f"{getLogCount(user_id)} Days", inline=True)
+        embed.add_field(name="Description", value=desc, inline=False)
         await message.channel.send(embed=embed)
 
     if message.content.startswith('!leaderboard'):
@@ -174,6 +177,5 @@ async def on_message(message):
             return
 
         await message.channel.purge(limit=int(args[1]))
-
 
 bot.run(TOKEN)
