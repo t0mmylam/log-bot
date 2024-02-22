@@ -7,7 +7,7 @@ import psycopg2.extras
 
 load_dotenv()
 TOKEN = os.environ["TOKEN"]
-DATABASE_URL = os.environ["DATABASE_URL"]  # Get DATABASE_URL from the environment
+DATABASE_URL = os.environ["HEROKU_POSTGRESQL_AMBER_URL"]  # Get DATABASE_URL from the environment
 
 # Connect to your postgres DB using DATABASE_URL
 conn = psycopg2.connect(DATABASE_URL, sslmode='require')  # Added sslmode as Heroku requires SSL connections
