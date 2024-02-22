@@ -80,7 +80,7 @@ async def on_message(message):
             await message.channel.send(f"<@{str(message.author.id)}> has already logged work today.")
             return
 
-        desc = message.content[1:]
+        desc = message.content[5:]
         now = get_est_now()
         cursor.execute('''
             INSERT INTO logs (user_id, log_time, description) VALUES (%s, %s, %s)
