@@ -7,18 +7,10 @@ import psycopg2.extras
 
 load_dotenv()
 TOKEN = os.environ["TOKEN"]
-DB_HOST = os.environ["DB_HOST"]
-DB_NAME = os.environ["DB_NAME"]
-DB_USER = os.environ["DB_USER"]
-DB_PASS = os.environ["DB_PASSWORD"]
+DATABASE_URL = os.environ["DATABASE_URL"]  # Get DATABASE_URL from the environment
 
-# Connect to your postgres DB
-conn = psycopg2.connect(
-    dbname=DB_NAME,
-    user=DB_USER,
-    password=DB_PASS,
-    host=DB_HOST
-)
+# Connect to your postgres DB using DATABASE_URL
+conn = psycopg2.connect(DATABASE_URL, sslmode='require')  # Added sslmode as Heroku requires SSL connections
 cursor = conn.cursor()
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS logs (
