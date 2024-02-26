@@ -64,7 +64,9 @@ def hasLoggedToday(user_id):
             WHERE user_id = %s AND log_time >= (CURRENT_DATE AT TIME ZONE 'UTC') AT TIME ZONE 'America/New_York'
         )
     ''', (user_id,))
-    return cursor.fetchone()[0] == 't'
+    res = cursor.fetchone()
+    print(user_id, res)
+    return cursor.fetchone()[0]
 
 
 @bot.event
