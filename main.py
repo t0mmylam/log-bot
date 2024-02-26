@@ -59,9 +59,12 @@ def lastLog(user_id):
 
 def hasLoggedToday(user_id):
     cursor.execute('''
-        SELECT * FROM logs WHERE user_id = %s AND log_time >= CURRENT_DATE
+        SELECT EXISTS(
+            SELECT 1 FROM logs 
+            WHERE user_id = %s AND log_time >= (CURRENT_DATE AT TIME ZONE 'UTC') AT TIME ZONE 'America/New_York'
+        )
     ''', (user_id,))
-    return cursor.fetchone() is not None
+    return cursor.fetchone()[0] == 't'
 
 
 @bot.event
