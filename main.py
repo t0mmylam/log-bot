@@ -65,8 +65,8 @@ def hasLoggedToday(user_id):
         )
     ''', (user_id,))
     res = cursor.fetchone()
-    print(user_id, res)
-    return cursor.fetchone()[0]
+    print(user_id, type(res), res)
+    return cursor.fetchone()
 
 
 @bot.event
