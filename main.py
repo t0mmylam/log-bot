@@ -133,7 +133,7 @@ async def on_message(message):
         await message.channel.send(embed=embed)
 
     if message.content.startswith('!clearall'):
-        if message.author.id != WORKERS["Tommy"]:
+        if str(message.author.id) != WORKERS["Tommy"]:
             print(message.author.id)
             await message.channel.send("You do not have permission to clear the work log.")
             return
