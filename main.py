@@ -56,10 +56,9 @@ def lastLog(user_id):
     ''', (user_id,))
     return cursor.fetchone()[0]
 
-
-def hasLoggedToday(user_id):
-    return False
-
+WORKERS = {
+    "Tommy" : "377929873991270410",
+}
 
 @bot.event
 async def on_ready():
@@ -133,18 +132,16 @@ async def on_message(message):
             name="!leaderboard", value="View the top 10 users by work logged.", inline=False)
         await message.channel.send(embed=embed)
 
-    if message.content.startswith('!clear'):
-        args = message.content.split()
-        if len(args) > 1:
-            user_id = args[1]
-        else:
-            user_id = message.author.id
-
+    if message.content.startswith('!clearall'):
+        if message.author.id != WORKERS["Tommy"]:
+            await message.channel.send("You do not have permission to clear the work log.")
+            return
+        
         cursor.execute('''
-            DELETE FROM logs WHERE user_id = ?
+            DELETE FROM logs
         ''', (user_id,))
         conn.commit()
-        await message.channel.send(f"<@{str(message.author.id)}> has cleared their work log.")
+        await message.channel.send(f"Cleared entire work log.")
 
     if message.content.startswith('!stats'):
         args = message.content.split()
